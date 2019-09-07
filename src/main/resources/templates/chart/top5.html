@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品热销Top5</title>
+    <script type="text/javascript" th:src="@{/static/js/jquery-3.1.0.js}"></script>
+    <link rel="stylesheet" th:href="@{/static/layui/css/layui.css}">
+    <script type="text/javascript" th:src="@{/static/js/echarts.min.js}"></script>
+</head>
+<body>
+<!-- 搜索条件开始 -->
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>查询条件</legend>
+</fieldset>
+<form action="" class="layui-form" method="get" id="queryForm">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">年报:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="month" id="month"  readonly="readonly" autocomplete="off" class="layui-input" placeholder="yyyy-MM">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime"  readonly="readonly" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" readonly="readonly"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-inline" style="text-align: center;">
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-btn-normal layui-btn-sm layui-icon layui-icon-search" id="doSearch">查询</button>
+                <button type="reset" class="layui-btn layui-btn-warm layui-btn-sm layui-icon layui-icon-refresh">重置</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<!-- 搜索条件结束 -->
+
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 800px;height:450px;align-items: center"></div>
+    <script th:src="@{/static/layui/layui.js}"></script>
+
+    <script type="text/javascript">
+        var context = [[@{/}]];
+        layui.use(['jquery', 'layer', 'form', 'laydate'],function () {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            var form = layui.form;
+            var laydate=layui.laydate;
+
+            //绑定时间选择器
+            laydate.render({
+                elem:'#month'
+                ,type: 'month'
+            });
+            laydate.render({
+                elem:'#startTime'
+            });
+            laydate.render({
+                elem:'#endTime'
+            })
+
+            // 指定图表的配置项和数据
+            function getData(url,params) {
+                var xdata=new Array();
+                var ydata=new Array();
+                $.getJSON(url,
+                        params,
+                        function(data){
+                    var myChart = echarts.init(document.getElementById('main'));
+                // 指定图表的配置项和数据
+                            $(data).each(function () {
+                                xdata.push(this.product_name);
+                                ydata.push(this.total_count);
+                            });
+               var option = {
+                    title: {
+                        text: '热销商品TOP5' },
+                    tooltip: {},
+                    legend: {
+                        data:['销量'] },
+                    xAxis: {
+                        data: xdata},
+                    yAxis: {},
+                    series: [{
+                            name: '销量',
+                            type: 'bar',
+                            data: ydata }] };
+                // 使用刚指定的配置项和数据显示图表。
+                 myChart.setOption(option);
+            }
+                )}
+
+                // 页面一加载，需要调用此函数，加载数据
+
+            getData(context+"shop/chart/top5Product");
+            $("#doSearch").click(function(data){
+                var params = {
+                    "month":$("#month").val(),
+                    "startTime":$("#startTime").val(),
+                    "endTime":$("#endTime").val()}
+                getData(context+"shop/chart/top5Product",params);
+            })
+
+
+        })
+
+    </script>
+</body>
+</html>

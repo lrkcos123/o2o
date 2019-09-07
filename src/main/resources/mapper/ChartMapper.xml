@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lrk.o2o.mapper.ChartMapper" >
+    <select id="getTop5Product" resultType="map" parameterType="map">
+        SELECT product_name,SUM(product_quantity) total_count
+        FROM tb_order_detail
+        <where>
+            <choose>
+                <when test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+                    create_time between #{startTime} and #{endTime}
+                </when>
+                <when test="month!=null and month!=''">
+                    date_format(create_time,'%Y-%m')=#{month}
+                </when>
+            </choose>
+        </where>
+        GROUP BY product_name
+        ORDER BY SUM(product_quantity) DESC LIMIT 5;
+    </select>
+
+
+    <select id="getOrderStatus" resultType="map" parameterType="map">
+      select
+      sum(if(order_status=0,1,0)) 'finish',
+      sum(if(order_status=1,1,0)) 'cancel',
+      sum(if(pay_status=0,1,0)) 'finish_pay',
+      sum(if(pay_status=1,1,0)) 'wait_pay'
+      from tb_order
+      <where>
+          <choose>
+              <when test="startTime !=null and startTime !='' and endTime !=null and endTime !=''">
+                  create_time between #{startTime} and #{endTime}
+              </when>
+              <when test="month!=null and month!=''">
+                  date_format(create_time,'%Y-%m')=#{month}
+              </when>
+          </choose>
+      </where>
+
+    </select>
+
+    <select id="getMoney" resultType="map" parameterType="map">
+        select date_format(create_time,'%Y-%m') order_time,
+        sum(order_amount) total_amount
+        from tb_order 
+        where pay_status=0
+        <choose>
+            <when test="startTime !=null and startTime !='' and endTime !=null and endTime !=''">
+                and create_time between #{startTime} and #{endTime}
+                group by date_format(create_time,'%Y-%m')
+            </when>
+            <when test="month!=null and month!=''">
+                and date_format(create_time,'%Y-%m')=#{month}
+                group by date_format(create_time,'%Y-%m')
+            </when>
+            <otherwise>
+                group by date_format(create_time,'%Y-%m')
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getMoneyByType"  resultType="map" parameterType="map">
+        SELECT b.product_category_name,
+        SUM(a.product_price*a.product_quantity) total_count
+        FROM tb_product_category b,tb_order_detail a
+        WHERE b.product_category_id=a.product_id
+        <choose>
+            <when test="startTime !=null and startTime !='' and endTime !=null and endTime !=''">
+                a.create_time between #{startTime} and #{endTime}
+            </when>
+            <when test="year!=null and year!=''">
+                date_format(a.create_time,'%Y')=#{year}
+            </when>
+        </choose>
+        GROUP BY a.product_id;
+    </select>
+</mapper>
