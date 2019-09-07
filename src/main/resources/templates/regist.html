@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html class="loginHtml">
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<head>
+	<meta charset="utf-8">
+	<title>注册</title>
+</head>
+<body class="loginBody">
+<form action="regist.html" method="post" >
+	<div>
+		用户名<input type="text" id="user_name" name="userName"> //th:text="${session.sessionUser.userName}"
+
+	</div>
+	<div>
+		密码<input type="password" id="password" name="passWord"> //th:text="${session.sessionUser.pwd}"
+	</div>
+	<div>
+		<button type="button" onclick="zhuce()" id="register">
+			注册
+		</button>
+	</div>
+</form>
+<!--<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
+<!--<script >-->
+	<!--zhuce=function(){-->
+		<!--var user_name=document.getElementsByName("user_name").value;-->
+		<!--var password=document.getElementById("password").value;-->
+		<!--$.ajax({-->
+			<!--type: 'POST',-->
+			<!--url:'/o2o/shop/register',-->
+			<!--data:{-->
+				<!--'user_name':user_name,-->
+				<!--'password':password-->
+			<!--},success:function (data) {-->
+				<!--if(data=="success"){-->
+					<!--alert("注册成功");-->
+					<!--location = "/o2o/shop/login";-->
+				<!--}else if (data=="fail"){-->
+					<!--alert("用户名已存在或其他原因注册失败!");-->
+				<!--}-->
+			<!--},error:function () {-->
+				<!--alert("输入异常!");-->
+			<!--}-->
+		<!--})-->
+	<!--}-->
+
+<!--</script>-->
+</body>
+</html>

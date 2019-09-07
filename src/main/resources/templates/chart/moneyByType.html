@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单分布</title>
+    <script type="text/javascript" th:src="@{/static/js/jquery-3.1.0.js}"></script>
+    <link rel="stylesheet" th:href="@{/static/layui/css/layui.css}">
+    <script type="text/javascript" th:src="@{/static/js/echarts.min.js}"></script>
+</head>
+<body>
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>查询条件</legend>
+</fieldset>
+<form action="" class="layui-form" method="get" id="queryForm">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">年报:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="year" id="year"  readonly="readonly" autocomplete="off" class="layui-input" placeholder="yyyy">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime"  readonly="readonly" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" readonly="readonly"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-inline" style="text-align: center;">
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-btn-normal layui-btn-sm layui-icon layui-icon-search" id="doSearch">查询</button>
+                <button type="reset" class="layui-btn layui-btn-warm layui-btn-sm layui-icon layui-icon-refresh">重置</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 900px;height:600px;align-items: center;"></div>
+<script th:src="@{/static/layui/layui.js}"></script>
+<script type="text/javascript">
+    var context = [[@{/}]];
+
+        layui.use(['jquery', 'layer', 'form', 'laydate'],function () {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            var form = layui.form;
+            var laydate=layui.laydate;
+
+            //绑定时间选择器
+            laydate.render({
+                elem:'#year'
+                ,type: 'year'
+            });
+            laydate.render({
+                elem:'#startTime'
+            });
+            laydate.render({
+                elem:'#endTime'
+            })
+
+            function getData(url,params) {
+                var xdata=new Array();
+                var ydata=new Array();
+                $.getJSON(url,
+                    params,
+                    function(data){
+                        var myChart = echarts.init(document.getElementById('main'));
+                        // 指定图表的配置项和数据
+                        $(data).each(function () {
+                            xdata.push(this.product_category_name);
+                            ydata.push({value:this.total_count,name:this.product_category_name});
+                        });
+
+
+            // var option = {
+            //     xAxis: {
+            //         type: 'category',
+            //         data: xdata
+            //     },
+            //     yAxis: {
+            //         type: 'value'
+            //     },
+            //     series: [{
+            //         data: ydata,
+            //         type: 'bar'
+            //     }]
+            // };
+
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    x: 'left',
+                    data:xdata
+                },
+                series: [
+                    {
+                        name:'访问来源',
+                        type:'pie',
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                show: true,
+                                textStyle: {
+                                    fontSize: '30',
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        },
+                        labelLine: {
+                            normal: {
+                                show: false
+                            }
+                        },
+                        data:ydata
+                    }
+                ]
+            };
+                        myChart.setOption(option);
+                    }
+                )}
+
+            // 页面一加载，需要调用此函数，加载数据
+
+            getData(context+"shop/chart/moneyByType");
+            $("#doSearch").click(function(data){
+                var params = {
+                    "year":$("#year").val(),
+                    "startTime":$("#startTime").val(),
+                    "endTime":$("#endTime").val()}
+                getData(context+"shop/chart/moneyByType",params);
+            })
+
+
+        })
+</script>
+</body>
+</html>
